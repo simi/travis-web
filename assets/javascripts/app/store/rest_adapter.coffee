@@ -23,3 +23,24 @@ require 'models'
     job: 'jobs'
     worker: 'workers'
     profile: 'profile'
+
+
+  findQuery: (store, type, query, recordArray) ->
+    root   = @rootForType(type)
+    plural = @pluralize(root)
+
+    @ajax(@buildURL(root, null, query), "GET", {
+      data: query,
+      success: (json) ->
+        @sideload(store, type, json, plural)
+        recordArray.load(json[plural])
+    })
+
+  buildURL: (record, suffix, query) ->
+    url = @_super.apply this, arguments
+    if query && query.repository_id
+      url = "/repositories/#{query.repository_id}#{url}"
+      delete query.repository_id
+
+    console.log url
+    url
